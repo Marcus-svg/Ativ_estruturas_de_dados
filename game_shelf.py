@@ -41,31 +41,32 @@ class ArrayList:
             raise IndexError("Index out of bounds exception")
         copy = self.array[position]
         self._shiftLeft(position, self.size() - 1)
+        self.array[self.lastPosition] = None
         return copy
 
     def removeAll(self):
         self.lastPosition = 0
 
     def _shiftLeft(self, start: int, end: int):
-        for i in range(start, end):
-            self.array[i] = self.array[i + 1]
+        for index in range(start, end):
+            self.array[index] = self.array[index + 1]
         self.lastPosition -= 1
 
     def _shiftRight(self, start: int, end: int):
-        for i in range(start, end, -1):
-            self.array[i] = self.array[i - 1]
+        for index in range(start, end, -1):
+            self.array[index] = self.array[index - 1]
         self.lastPosition += 1
 
     def _resizeMemory(self):
         print(f"  [ArrayList] Memoria cheia ({self.capacity()} slots) -> expandindo para {self.capacity() * 2}")
         newArray = [None] * (self.capacity() * 2)
-        for i in range(self.capacity()):
-            newArray[i] = self.array[i]
+        for index in range(self.capacity()):
+            newArray[index] = self.array[index]
         self.array = newArray
 
     def print(self):
         print(f"  Lista ({self.size()} itens / {self.capacity()} slots): ", end="")
-        print([self.array[i] for i in range(self.size())])
+        print([self.array[index] for index in range(self.size())])
 
 
 class Game:
@@ -88,17 +89,17 @@ class GameShelf:
 
     def addGame(self, game: Game):
         insertPos = self._shelf.size()
-        for i in range(self._shelf.size()):
-            if game.rating > self._shelf.get(i).rating:
-                insertPos = i
+        for current_index in range(self._shelf.size()):
+            if game.rating > self._shelf.get(current_index).rating:
+                insertPos = current_index
                 break
         self._shelf.insertAt(game, insertPos)
         print(f"  '{game.title}' adicionado na posicao {insertPos}")
 
     def removeByTitle(self, title: str):
-        for i in range(self._shelf.size()):
-            if self._shelf.get(i).title.lower() == title.lower():
-                removed = self._shelf.removeAt(i)
+        for search_index in range(self._shelf.size()):
+            if self._shelf.get(search_index).title.lower() == title.lower():
+                removed = self._shelf.removeAt(search_index)
                 print(f"  '{removed.title}' removido da estante")
                 return removed
         print(f"  Jogo '{title}' nao encontrado")
@@ -149,7 +150,8 @@ shelf.addGame(Game("Blasphemous",                    "Metroidvania",   9.9, "PC"
 shelf.addGame(Game("FIFA 25",                    "Sports",       5.0, "PS5"))
 shelf.addGame(Game("Cyberpunk 2077",             "RPG",          9.5, "PC"))
 shelf.addGame(Game("Stardew Valley",             "Simulation",   9.0, "PC"))
-
+shelf.addGame(Game("GTA",             "Simulation",   10.0, "PC"))
+shelf.addGame(Game("GTA",             "Simulation",   10.0, "PC"))
 
 shelf.display()
 
