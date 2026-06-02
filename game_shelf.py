@@ -107,10 +107,10 @@ class GameShelf:
 
     def findByGenre(self, genre: str):
         results = ArrayList()
-        for i in range(self._shelf.size()):
-            g = self._shelf.get(i)
-            if g.genre.lower() == genre.lower():
-                results.add(g)
+        for search_index in range(self._shelf.size()):
+            current_game = self._shelf.get(search_index)
+            if current_game.genre.lower() == genre.lower():
+                results.add(current_game)
         return results
 
     def top(self, n: int = 3):
