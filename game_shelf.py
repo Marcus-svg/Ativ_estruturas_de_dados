@@ -1,73 +1,97 @@
-class ArrayList:
+class Node:
+    def __init__(self, value):
+        self.content = value
+        self.next: Node = None
+
+class LinkedList:
     def __init__(self):
-        self.MEMORY_SPACE = 5
-        self.lastPosition = 0
-        self.array = [None] * self.MEMORY_SPACE
+        self.head: Node = None
+        self.tail: Node = None
+        self._length: int = 0
 
-    def get(self, position: int):
-        if position < 0 or position > self.size() - 1:
-            raise IndexError("Index out of bounds exception")
-        return self.array[position]
-
+    def isEmpty(self):
+        return self.head == None
+    
     def size(self):
-        return self.lastPosition
-
+        return self._length
+    
     def capacity(self):
-        return len(self.array)
+        return "Infinita"
+    
+    def get(self, position: int):
+        if position < 0 or position >= self._length:
+            raise IndexError("Index out of bounds exception")
+        aux = self.head
+        for _ in range(position):
+            aux = aux.next
+        return aux.content
 
     def add(self, value):
-        if self.lastPosition == self.capacity():
-            self._resizeMemory()
-        self.array[self.lastPosition] = value
-        self.lastPosition += 1
+        newNode = Node(value)
+        self._length += 1
+        if self.isEmpty():
+            self.head = newNode
+            self.tail = newNode
+        else:
+            self.tail.next = newNode
+            self.tail = newNode
 
     def insertAt(self, value, position: int):
-        if position < 0 or position > self.lastPosition:
+        if position < 0 or position > self._length:
             raise IndexError("Index out of bounds exception")
-        if self.lastPosition == self.capacity():
-            self._resizeMemory()
-        self._shiftRight(self.lastPosition, position)
-        self.array[position] = value
+    
+        if position == self._length:
+            self.add(value)
+            return
+    
+        newNode = Node(value)
 
-    def remove(self):
-        if self.size() == 0:
-            raise IndexError("Lista vazia")
-        last = self.array[self.lastPosition - 1]
-        self.lastPosition -= 1
-        return last
+        if position == 0:
+            newNode.next = self.head
+            self.head = newNode
+            self._length += 1
+            return
+    
+        aux = self.head
+        for _ in range(position - 1):
+            aux = aux.next
 
+        newNode.next = aux.next
+        aux.next = newNode
+        self._length += 1
     def removeAt(self, position: int):
-        if position < 0 or position > self.size() - 1:
+        if position < 0 or position >= self._length:
             raise IndexError("Index out of bounds exception")
-        copy = self.array[position]
-        self._shiftLeft(position, self.size() - 1)
-        self.array[self.lastPosition] = None
-        return copy
+        
+        if position == 0:
+            copy = self.head
+            self.head = self.head.next
+            self._length -= 1
+            if self._length == 0:
+                self.tail = None
+            return copy.content
+        
+        aux = self.head
+        for _ in range(position - 1):
+            aux = aux.next
 
-    def removeAll(self):
-        self.lastPosition = 0
+        node_to_remove = aux.next
 
-    def _shiftLeft(self, start: int, end: int):
-        for index in range(start, end):
-            self.array[index] = self.array[index + 1]
-        self.lastPosition -= 1
+        if node_to_remove == self.tail:
+            self.tail = aux
 
-    def _shiftRight(self, start: int, end: int):
-        for index in range(start, end, -1):
-            self.array[index] = self.array[index - 1]
-        self.lastPosition += 1
+        aux.next = node_to_remove.next
+        self._length -= 1
 
-    def _resizeMemory(self):
-        print(f"  [ArrayList] Memoria cheia ({self.capacity()} slots) -> expandindo para {self.capacity() * 2}")
-        newArray = [None] * (self.capacity() * 2)
-        for index in range(self.capacity()):
-            newArray[index] = self.array[index]
-        self.array = newArray
-
+        return node_to_remove.content
+    
     def print(self):
-        print(f"  Lista ({self.size()} itens / {self.capacity()} slots): ", end="")
-        print([self.array[index] for index in range(self.size())])
-
+        aux = self.head
+        elements = []
+        while aux != None:
+            elements.append(str(aux.content))
+            aux = aux.next
+        print("  [" + ", ".join(elements) + "]")
 
 class Game:
     def __init__(self, title: str, genre: str, rating: float, platform: str):
@@ -85,7 +109,7 @@ class Game:
 class GameShelf:
     def __init__(self, owner: str):
         self.owner = owner
-        self._shelf = ArrayList()
+        self._shelf = LinkedList()
 
     def addGame(self, game: Game):
         insertPos = self._shelf.size()
@@ -106,33 +130,33 @@ class GameShelf:
         return None
 
     def findByGenre(self, genre: str):
-        results = ArrayList()
+        results = LinkedList()
         for search_index in range(self._shelf.size()):
             current_game = self._shelf.get(search_index)
             if current_game.genre.lower() == genre.lower():
                 results.add(current_game)
         return results
 
-    def top(self, n: int = 3):
-        result = ArrayList()
-        limit = min(n, self._shelf.size())
-        for i in range(limit):
-            result.add(self._shelf.get(i))
+    def top(self, maximum_quantity: int = 3):
+        result = LinkedList()
+        limit = min(maximum_quantity, self._shelf.size())
+        for index in range(limit):
+            result.add(self._shelf.get(index))
         return result
 
     def display(self):
         print(f"\n  === Estante de {self.owner} ({self._shelf.size()} jogos) ===")
         if self._shelf.size() == 0:
             print("  (vazia)")
-        for i in range(self._shelf.size()):
-            print(f"  {i:2}. {self._shelf.get(i)}")
+        for index in range(self._shelf.size()):
+            print(f"  {index:2}. {self._shelf.get(index)}")
         print()
 
     def stats(self):
         if self._shelf.size() == 0:
             print("  Estante vazia")
             return
-        total = sum(self._shelf.get(i).rating for i in range(self._shelf.size()))
+        total = sum(self._shelf.get(index).rating for index in range(self._shelf.size()))
         avg = total / self._shelf.size()
         best = self._shelf.get(0)
         worst = self._shelf.get(self._shelf.size() - 1)
@@ -146,12 +170,12 @@ shelf = GameShelf("Fulano")
 
 print("\n=== Adicionando jogos ===")
 shelf.addGame(Game("Hollow Knight",              "Metroidvania", 9.8, "PC"))
-shelf.addGame(Game("Blasphemous",                    "Metroidvania",   9.9, "PC"))
+shelf.addGame(Game("Blasphemous",                "Metroidvania", 9.9, "PC"))
 shelf.addGame(Game("FIFA 25",                    "Sports",       5.0, "PS5"))
 shelf.addGame(Game("Cyberpunk 2077",             "RPG",          9.5, "PC"))
 shelf.addGame(Game("Stardew Valley",             "Simulation",   9.0, "PC"))
-shelf.addGame(Game("GTA",             "Simulation",   10.0, "PC"))
-shelf.addGame(Game("GTA",             "Simulation",   10.0, "PC"))
+shelf.addGame(Game("GTA",                        "Simulation",   10.0, "PC"))
+shelf.addGame(Game("GTA",                        "Simulation",   10.0, "PC"))
 
 shelf.display()
 
@@ -160,19 +184,36 @@ shelf.stats()
 
 print("=== Top 3 jogos ===")
 top3 = shelf.top(3)
-for i in range(top3.size()):
-    print(f"  #{i+1}  {top3.get(i)}")
+for position in range(top3.size()):
+    print(f"  #{position+1}  {top3.get(position)}")
 
 print("\n=== Jogos de RPG ===")
 rpgs = shelf.findByGenre("RPG")
-for i in range(rpgs.size()):
-    print(f"  -> {rpgs.get(i)}")
+for position in range(rpgs.size()):
+    print(f"  -> {rpgs.get(position)}")
 
 print("\n=== Removendo FIFA 25 ===")
 shelf.removeByTitle("FIFA 25")
 shelf.display()
 
-print("=== Estado final da ArrayList ===")
+print("=== Estado final da LinkedList ===")
 print(f"  Tamanho   : {shelf._shelf.size()}")
 print(f"  Capacidade: {shelf._shelf.capacity()}")
 shelf._shelf.print()
+
+import time
+print("")
+print("                            TESTE DE ESTRESSE")
+print("")
+inicio_tempo = time.time()
+
+
+for i in range(1000):
+    
+    
+    shelf._shelf.insertAt(Game(f"Jogo Clone {i}", "Ação", 7.0, "PC"), 0)
+
+fim_tempo = time.time()
+
+print(f"  Tamanho final da estante: {shelf._shelf.size()} jogos")
+print(f"  Tempo gasto para processar: {fim_tempo - inicio_tempo:.4f} segundos")
